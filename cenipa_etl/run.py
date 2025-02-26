@@ -18,15 +18,15 @@ class Run:
         action_function()
 
     def parse_args(self):
-        action = sys.argv[1]
-        args = sys.argv[2:]  # Exclude script name
+        action = sys.argv[2]
+        args = sys.argv[3:]  # Exclude script name
         arg_dict = {}  # Initialize dictionary with script name
 
         # Loop through arguments with index
         for i, arg in enumerate(args):
             if arg.startswith("--"):  # Argument name (e.g., --source)
                 key = arg[2:]  # Remove "--"
-                if i + 1 < len(args) and not args[i + 1].startswith("--"):  # Check if there's a value
+                if i + 1 < len(args) and not args[i + 1].startswith("--"):
                     arg_dict[key] = args[i + 1]
                 else:
                     arg_dict[key] = True  # Handle flags (e.g., --verbose)
@@ -37,9 +37,10 @@ class Run:
         print("Error: Invalid action. Use 'help' for available options.")
 
     def print_help(self):
-        help_text = HelpHandler() 
+        help_text = HelpHandler()
         help_text.print_help()
 
     def etl(self):
         etl = Etl(self.params)
+        etl.run_etl()
         return etl

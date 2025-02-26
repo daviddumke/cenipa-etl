@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/root/.config/gcloud/application_default_credentials.json
+      - CENIPA_SOURCE_NAME=cenipa
+      - CENIPA_SOURCE_FORMAT=csv
+      - CENIPA_SOURCE_URL_BASE=https://dedalo.sti.fab.mil.br/dadosabertos/
+      - CENIPA_SOURCE_STREAMS=aeronave,fator_contribuinte
+      - CENIPA_SOURCE_LIMIT=7
+      - CENIPA_TARGET_PROJECT=meltano-dataops
+      - CENIPA_TARGET_DATASET=data_lake
+    volumes:
+      - .:/app
+      - ~/.config/gcloud/application_default_credentials.json:/root/.config/gcloud/application_default_credentials.json
+    command: tail -f /dev/null && poetry install # Keeps the container running
+    restart: unless-stopped

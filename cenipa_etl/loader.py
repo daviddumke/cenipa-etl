@@ -1,21 +1,21 @@
+import os
 import pandas as pd
 from google.cloud import bigquery
 
 class Loader:
-    def __init__(self, data):
+    def __init__(self, stream, data):
         self.transformed_data_df = data
-        print(self.transformed_data_df)
+        # Define your dataset and table
+        self.prefix = os.getenv("CENIPA_SOURCE_NAME")
+        self.project_id = os.getenv("CENIPA_TARGET_PROJECT")
+        self.dataset_id = os.getenv("CENIPA_TARGET_DATASET")
+        self.table_id = self.prefix + "_" + stream
 
     def load(self):
-        # Define your dataset and table
-        project_id = "cenipa"
-        dataset_id = "data_lake"
-        table_id = "aeronaves"
-
         # Define the full table path
-        table_ref = f"{project_id}.{dataset_id}.{table_id}"
+        table_ref = f"{self.project_id}.{self.dataset_id}.{self.table_id}"
         # Initialize the BigQuery client
-        client = bigquery.Client()
+        client = bigquery.Client(project=self.project_id)
 
         # Load the DataFrame into BigQuery
         job = client.load_table_from_dataframe(self.transformed_data_df, table_ref)

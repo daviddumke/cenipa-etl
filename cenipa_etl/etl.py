@@ -1,3 +1,4 @@
+import os
 from cenipa_etl.extractor import Extractor
 from cenipa_etl.loader import Loader
 from cenipa_etl.transformer import Transformer
@@ -8,10 +9,8 @@ class Etl:
         self.extracted_data = None
         self.transformed_data = None
         self.sent_data = None
-
-        self.extract_data()
-        self.transform_data()
-        self.load_data()
+        source_streams = os.getenv("CENIPA_SOURCE_STREAMS", "")
+        self.source_streams_list =  source_streams.split(",") if source_streams else []
 
     def is_valid_params(self, params): 
         required_params = ["source", "target"]
@@ -26,8 +25,8 @@ class Etl:
         else:
             return params
 
-    def extract_data(self):
-        extractor = Extractor(self.params["source"], self.params["limit"])
+    def extract_data(self, stream):
+        extractor = Extractor(stream)
         self.extracted_data = extractor.extract()
         return self.extracted_data
 
@@ -36,7 +35,13 @@ class Etl:
         self.transformed_data = transformer.transform()
         return self.transformed_data
 
-    def load_data(self):
-        loader = Loader(self.transformed_data)
+    def load_data(self, stream):
+        loader = Loader(stream, self.transformed_data)
         self.sent_data = loader.load()
         print(self.sent_data)
+
+    def run_etl(self):
+        for stream in self.source_streams_list:
+            self.extract_data(stream)
+            self.transform_data()
+            self.load_data(stream)
